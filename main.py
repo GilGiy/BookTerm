@@ -106,13 +106,52 @@ def setup_newfile ():
 	response[coa_setup_response]()
 
 def open_file(file):
-	print("Opening " + str(file))
+
+	db_exists = os.path.isfile(str(file) + '.db')
+	if db_exists:
+		print("Opening File")
+	else:
+		print("File does NOT exist!")
+		bookterm_startup()
+
+	os.system('cls' if os.name == 'nt' else 'clear')
+	print("Open File: " + str(file))
 	term_file = sqlite3.connect(str(file) + '.db')
 
 	c = term_file.cursor()
-	c.execute("SELECT * FROM accounts WHERE normal='Debit'")
-	print(c.fetchall())
+	# c.execute("SELECT * FROM accounts WHERE normal='Debit'")
+	# print(c.fetchall())
 
+	print("(1: Debit Transaction. 2: Credit Transaction. 3: Reports. 4: Chart of Accounts. 5: Add/Edit/Remove. 6: Close File)")
+	def debits():
+		os.system('cls' if os.name == 'nt' else 'clear')
+		print("Debits")
+
+	def credits():
+		os.system('cls' if os.name == 'nt' else 'clear')
+		print("Credits")
+
+	def reports():
+		os.system('cls' if os.name == 'nt' else 'clear')
+		print("Reports")
+
+	def coa():
+		os.system('cls' if os.name == 'nt' else 'clear')
+		print("Chart of Accounts")
+
+	def add_edit_remove():
+		os.system('cls' if os.name == 'nt' else 'clear')
+		print("Add/Edit/Remove")
+
+	def quit():
+		c.close()
+		bookterm_startup()
+
+
+	user_action = {'1' : debits, '2' : credits, '3' : reports, '4' : coa, '5' : add_edit_remove, '6' : quit}
+
+	user_input = raw_input(": ")
+	user_action[user_input]()
 
 
 def bookterm_startup():
