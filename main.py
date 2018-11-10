@@ -21,6 +21,14 @@ def setup_newfile ():
 		            )""")
 		for i in range (0, rec_accounts_length):
 			c.execute("INSERT INTO accounts VALUES (?, ?, 'Debit', 0)", (i, rec_accounts[i],))
+
+		c.execute("""CREATE TABLE transactions (
+		            description text,
+		            account text,
+		            balance_side text,
+		            amount integer
+		            )""")
+
 		new_db_connection.commit()
 
 		master_db_exists = os.path.isfile('master_db.db')
@@ -61,6 +69,14 @@ def setup_newfile ():
 			user_coa_len = len(user_coa) - 1
 			for i in range (0, user_coa_len):
 				c.execute("INSERT INTO accounts VALUES (?, 'Debit', 0)", (user_coa[i],))
+
+			c.execute("""CREATE TABLE transactions (
+            description text,
+            account text,
+            balance_side text,
+            amount integer
+            )""")
+
 			new_db_connection.commit()
 
 			print("Raw DB is as follows")
@@ -107,25 +123,62 @@ def setup_newfile ():
 
 def open_file(file):
 
+	def query_coa():
+		account_list_query = c.execute('select name from accounts').fetchall()
+
+		c.execute("SELECT max(rowid) from accounts")
+		rows_number = (c.fetchone()[0])
+
+		global accounts_list
+		accounts_list = []
+		# global accounts_list = []
+
+		for i in range (0, rows_number):
+			account_name = account_list_query[i][0]
+			print (account_name)
+			accounts_list.append(account_name)
+
+
+
+
 	db_exists = os.path.isfile(str(file) + '.db')
 	if db_exists:
 		print("Opening File")
 	else:
-		print("File does NOT exist!")
-		bookterm_startup()
+		os.system('cls' if os.name == 'nt' else 'clear')
+		print("File does NOT exist! Remove from list?")
 
 	os.system('cls' if os.name == 'nt' else 'clear')
 	print("Open File: " + str(file))
 	term_file = sqlite3.connect(str(file) + '.db')
 
 	c = term_file.cursor()
-	# c.execute("SELECT * FROM accounts WHERE normal='Debit'")
-	# print(c.fetchall())
-
+	query_coa()
 	print("(1: Debit Transaction. 2: Credit Transaction. 3: Reports. 4: Chart of Accounts. 5: Add/Edit/Remove. 6: Close File)")
 	def debits():
 		os.system('cls' if os.name == 'nt' else 'clear')
-		print("Debits")
+		print("New Expense Transaction:")
+
+		t_desc = raw_input("Description: ")
+
+		def complete(text, state):
+			for cmd in accounts_list:
+			# for cmd in accounts_list:
+				if cmd.startswith(text):
+					if not state:
+						return cmd
+					else:
+						state -= 1
+
+		readline.parse_and_bind("tab: complete")
+		readline.set_completer(complete)
+		# print(query_coa())
+		t_accnt = raw_input("Account: ")
+
+		t_amount = input("Amount: ")
+
+		c.execute("INSERT INTO transactions VALUES (?, ?, ?, ?)", (t_desc, t_accnt, 'Debit', t_amount))
+		term_file.commit()
 
 	def credits():
 		os.system('cls' if os.name == 'nt' else 'clear')
@@ -137,7 +190,19 @@ def open_file(file):
 
 	def coa():
 		os.system('cls' if os.name == 'nt' else 'clear')
-		print("Chart of Accounts")
+		print("Chart of Accounts:\n\n")
+		# def complete(text, state):
+		# 	for cmd in accounts_list:
+		# 	# for cmd in accounts_list:
+		# 		if cmd.startswith(text):
+		# 			if not state:
+		# 				return cmd
+		# 			else:
+		# 				state -= 1
+
+		# readline.parse_and_bind("tab: complete")
+		# readline.set_completer(complete)
+		print(query_coa())
 
 	def add_edit_remove():
 		os.system('cls' if os.name == 'nt' else 'clear')
