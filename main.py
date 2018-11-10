@@ -124,6 +124,7 @@ def setup_newfile ():
 def open_file(file):
 
 	def query_coa():
+
 		account_list_query = c.execute('select name from accounts').fetchall()
 
 		c.execute("SELECT max(rowid) from accounts")
@@ -131,14 +132,12 @@ def open_file(file):
 
 		global accounts_list
 		accounts_list = []
-		# global accounts_list = []
+
 
 		for i in range (0, rows_number):
 			account_name = account_list_query[i][0]
-			print (account_name)
 			accounts_list.append(account_name)
-
-
+			# print(account_name)
 
 
 	db_exists = os.path.isfile(str(file) + '.db')
@@ -153,7 +152,6 @@ def open_file(file):
 	term_file = sqlite3.connect(str(file) + '.db')
 
 	c = term_file.cursor()
-	query_coa()
 	print("(1: Debit Transaction. 2: Credit Transaction. 3: Reports. 4: Chart of Accounts. 5: Add/Edit/Remove. 6: Close File)")
 	def debits():
 		os.system('cls' if os.name == 'nt' else 'clear')
@@ -180,6 +178,8 @@ def open_file(file):
 		c.execute("INSERT INTO transactions VALUES (?, ?, ?, ?)", (t_desc, t_accnt, 'Debit', t_amount))
 		term_file.commit()
 
+		open_file(file)
+
 	def credits():
 		os.system('cls' if os.name == 'nt' else 'clear')
 		print("Credits")
@@ -188,21 +188,23 @@ def open_file(file):
 		os.system('cls' if os.name == 'nt' else 'clear')
 		print("Reports")
 
+
+
+
+
 	def coa():
 		os.system('cls' if os.name == 'nt' else 'clear')
-		print("Chart of Accounts:\n\n")
-		# def complete(text, state):
-		# 	for cmd in accounts_list:
-		# 	# for cmd in accounts_list:
-		# 		if cmd.startswith(text):
-		# 			if not state:
-		# 				return cmd
-		# 			else:
-		# 				state -= 1
 
-		# readline.parse_and_bind("tab: complete")
-		# readline.set_completer(complete)
-		print(query_coa())
+		term_file.text_factory = str
+		account_list_query = c.execute('select name, balance from accounts').fetchall()
+
+		row_count=len(account_list_query)
+		print ("Account                       Balance")
+		print ("-------------------------------------")
+		i=0
+		while i<row_count:
+			print account_list_query[i][0],' '*(20 - len(account_list_query[i])),account_list_query [i][1],' '*(12-len(str(account_list_query[i][1])))
+			i=i+1 
 
 	def add_edit_remove():
 		os.system('cls' if os.name == 'nt' else 'clear')
@@ -290,3 +292,4 @@ def print_coa():
 	c = new_db_connection.cursor()
 	c.execute("SELECT * FROM accounts WHERE normal='Debit'")
 	print(c.fetchall())
+
